@@ -1,4 +1,11 @@
-package LinkExtractor;
+/**
+ * CETTE CLASSE N'EST PAS UTILE MAIS SURTOUT NE PAS LA SUPPRIMER !!!!!!!!!!!!!!!
+ * 
+ * 
+ * 
+ * 
+ * DON'T DELETE
+ */
 
 import java.util.ArrayList;
 import java.util.List;

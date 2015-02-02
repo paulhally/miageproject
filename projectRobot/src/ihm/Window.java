@@ -8,6 +8,8 @@ package ihm;
 
 import javax.swing.JOptionPane;
 
+import Robot.RobotFunctionnality;
+
 /**
  *
  * @author Paul
@@ -165,6 +167,8 @@ public class Window extends javax.swing.JFrame {
     		String url=this.urlTF.getText();
     		if(isURL(url)){
     			//Run the appli
+    			RobotFunctionnality rf=new RobotFunctionnality(url,keyWords,2);
+    			rf.go();
     		}
     		else{
     			JOptionPane jop1 = new JOptionPane();
