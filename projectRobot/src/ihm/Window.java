@@ -167,8 +167,13 @@ public class Window extends javax.swing.JFrame {
     		String url=this.urlTF.getText();
     		if(isURL(url)){
     			//Run the appli
-    			RobotFunctionnality rf=new RobotFunctionnality(url,keyWords,2);
-    			rf.go();
+    			System.out.println(this.timeSpent.getSelectedItem());
+    			Integer i=Integer.valueOf((String) this.timeSpent.getSelectedItem());
+    			
+    			RobotFunctionnality rf=new RobotFunctionnality(url,keyWords,i);
+    			Thread t=new Thread();
+    			t.start();
+    			rf.go(t);
     		}
     		else{
     			JOptionPane jop1 = new JOptionPane();

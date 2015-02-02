@@ -14,9 +14,6 @@ public class LinkExtractor {
 	
 	
 	private String baseUrl;
-	private String MotCle = "directory";
-
-	
 	
 	public LinkExtractor(String url){
 		this.baseUrl=url;
@@ -30,12 +27,15 @@ public class LinkExtractor {
 		List <WebElement> ListLien =  d.findElements(By.xpath("//a[@href]"));
 		List <String> TableauLiens = new ArrayList<String>(); 
 		String lien = new String();
+		
 		for(int i = 0; i < ListLien.size(); i++){
 			lien = ListLien.get(i).getAttribute("href");
+			
 			if(lien.startsWith("http")){
 				TableauLiens.add(lien);
 			}
 		}
+		
 		for(int j = 0; j< TableauLiens.size(); j++){
 			System.out.println("Lien "+j+" : "+TableauLiens.get(j));
 			

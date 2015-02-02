@@ -2,6 +2,7 @@ package Robot;
 
 
 import java.util.List;
+import java.util.Random;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -12,10 +13,11 @@ public class RobotFunctionnality {
 	static String currentUrl;
 	String[] keyWords;
 	Integer time;
+	Integer counter;
 	private static WebDriver driver; 
 	
 	public static WebDriver setUp(String adresseUrl) throws Exception {
-		// A faire qu une fois ?
+		
 		currentUrl = adresseUrl;
 		driver.get(currentUrl);
 		return driver;
@@ -27,10 +29,11 @@ public class RobotFunctionnality {
 		this.currentUrl=url;
 		this.keyWords=kw;
 		this.time=t;
+		this.counter=3;
 		driver = new FirefoxDriver(); 
 	}
 	
-	public void go(){
+	public void go(Thread t){
 		WebDriver d = null;
 			System.out.println(currentUrl);
 			try {
@@ -44,13 +47,34 @@ public class RobotFunctionnality {
 		
 		LinkExtractor le=new LinkExtractor(currentUrl);
 		List<String>linkList=le.RecupLien(d);
+		
+		
+		Random rand=new Random();
+		int i=rand.nextInt(linkList.size());
+		System.out.println("Ramdom : " + i);
 		try {
-			d = RobotFunctionnality.setUp(linkList.get(1));
+			d = RobotFunctionnality.setUp(linkList.get(i));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
+		
+		counter--;
+		if(counter!=0){
+			this.currentUrl=linkList.get(i);
+			try {
+				System.out.println("En Attente pendant " + time + " sec");
+				t.sleep(time*1000);
+				
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			go(t);
+		}
+		else{
+			System.out.println("Surf terminé");
+		}
 
 	}
 	
