@@ -5,6 +5,9 @@
  */
 
 package ihm;
+
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author Paul
@@ -62,7 +65,7 @@ public class Window extends javax.swing.JFrame {
         });
 
         kwLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        kwLabel.setText("Key Words : ");
+        kwLabel.setText("Key Words (separeted by a \",\") : ");
 
         kwTF.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -99,11 +102,11 @@ public class Window extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(kwTF, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(urlTF, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(kwTF, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(urlTF, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addContainerGap(44, Short.MAX_VALUE))))
             .addGroup(layout.createSequentialGroup()
-                .addGap(102, 102, 102)
+                .addGap(158, 158, 158)
                 .addComponent(goButton, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -144,16 +147,47 @@ public class Window extends javax.swing.JFrame {
     
     private void goActionPerformed(java.awt.event.ActionEvent evt) {                                     
         // TODO add your handling code here:
-    	System.out.println("hihihihih");
+    	if(this.kwTF.getText().equals("")){
+    		
+    		JOptionPane jop1 = new JOptionPane();
+    		jop1.showMessageDialog(null, "Thanks to enter the keywords", "Information", JOptionPane.INFORMATION_MESSAGE);
+    	}
+    	else if(this.urlTF.getText().equals("")){
+
+    		JOptionPane jop1 = new JOptionPane();
+    		jop1.showMessageDialog(null, "Thanks to enter the url", "Information", JOptionPane.INFORMATION_MESSAGE);
+    	}
+    	else{
+    		//Split 
+    		String[]keyWords=kwTF.getText().split(",");
+    		for(int i=0;i<keyWords.length;i++){
+    			//Delete useless spaces
+    			keyWords[i] =keyWords[i].replaceAll("\\s", "");
+    			System.out.println(keyWords[i]);
+    		}
+    		
+    		//Url Verification
+    		String url=this.urlTF.getText();
+    		if(isURL(url)){
+    			//Run the appli
+    		}
+    		else{
+    			JOptionPane jop1 = new JOptionPane();
+        		jop1.showMessageDialog(null, "Enter a correct url", "Information", JOptionPane.INFORMATION_MESSAGE);
+    		}
+    	}
     } 
 
     /**
-     * @param args the command line arguments
+     * Return true if the string is a correct url
+     * @param s
+     * @return
      */
-    /*public static void main(String args[]) {
-        
-       
-    }*/
+    public boolean isURL(String s){
+      return s.matches("\\b(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
+         
+    }
+
     public static void run(){
     	 try {
              for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
