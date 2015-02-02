@@ -44,7 +44,21 @@ public class RobotFunctionnality {
 		
 		LinkExtractor le=new LinkExtractor(currentUrl);
 		List<String>linkList=le.RecupLien(d);
-		
-		
+		try {
+			d = RobotFunctionnality.setUp(linkList.get(1));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
+
+	}
+	
+	public void back(WebDriver d){
+		d.navigate().back();
+	}
+	
+	public void close(WebDriver d){
+		d.close();
 	}
 }

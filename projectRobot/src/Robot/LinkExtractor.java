@@ -40,7 +40,7 @@ public class LinkExtractor {
 			System.out.println("Lien "+j+" : "+TableauLiens.get(j));
 			
 		}
-		
+		System.out.println("Fin de l'extraction");
 		return TableauLiens;
 
 		
