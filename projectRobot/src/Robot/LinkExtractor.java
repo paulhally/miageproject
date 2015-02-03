@@ -2,7 +2,9 @@ package Robot;
 
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -36,12 +38,19 @@ public class LinkExtractor {
 			}
 		}
 		
-		for(int j = 0; j< TableauLiens.size(); j++){
-			System.out.println("Lien "+j+" : "+TableauLiens.get(j));
+		//Gestion des doublons
+		// Créer une liste de contenu unique basée sur les éléments de ArrayList
+	    Set<String> mySet = new HashSet<String>(TableauLiens);
+	 
+	    // Créer une Nouvelle ArrayList à partir de Set
+	    List<String> array_Liens = new ArrayList<String>(mySet);
+	    
+		for(int j = 0; j< array_Liens.size(); j++){
+			System.out.println("Lien "+j+" : "+array_Liens.get(j));
 			
 		}
 		System.out.println("Fin de l'extraction");
-		return TableauLiens;
+		return array_Liens;
 
 		
 	}

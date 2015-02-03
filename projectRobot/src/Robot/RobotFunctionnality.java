@@ -29,7 +29,7 @@ public class RobotFunctionnality {
 		this.currentUrl=url;
 		this.keyWords=kw;
 		this.time=t;
-		this.counter=3;
+		this.counter=5;
 		driver = new FirefoxDriver(); 
 	}
 	
@@ -48,6 +48,7 @@ public class RobotFunctionnality {
 		LinkExtractor le=new LinkExtractor(currentUrl);
 		List<String>linkList=le.RecupLien(d);
 		
+		//LinkSelector --> wait for it
 		
 		Random rand=new Random();
 		int i=rand.nextInt(linkList.size());
