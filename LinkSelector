@@ -1,0 +1,45 @@
+package Robot;
+
+import java.io.IOException;
+import java.util.*;
+
+import de.linguatools.disco.DISCO;
+
+public class LinkSelector {
+    private List<String> linkList;
+    private String keyWords;
+    private float[][] matrix;
+    /*Matrix notes matrix[0][0] : frequency du lien 1.
+      Matrix notes matrix[0][1] : contains du lien 1. si contains retourne true ==> 1, 0 sinon
+    */
+
+    public LinkSelector(List<String> linkList, String keyWords) {
+        this.keyWords = keyWords;
+        this.linkList = linkList;
+        this.matrix = new float[linkList.size()][2];
+        //création objet DISCO
+        try {
+            int i = 0;
+            DISCO dis = new DISCO("C:\\Users\\Master\\workspace\\miageproject\\lib\\fr-wikipedia-20110201-lemma", false);
+            /* Itérateur qui va comparer chaque case de la List<String> */
+            ListIterator li = linkList.listIterator();
+            while (li.hasNext()) {
+                this.matrix[i][0] = dis.frequency(linkList.get(i));
+                if (linkList.get(i).contains(keyWords)) this.matrix[i][1] = 1.f;
+                else this.matrix[i][1] = 0.f;
+                li.next();
+                i++;
+            }
+        } catch (IOException e) {
+            System.out.println("erreur nom: " + e.getMessage());
+        }
+    }
+
+    public void printAll() {
+        for (int a = 0; a < this.linkList.size(); a++) {
+            System.out.println("description des caracs de l\'url " + this.linkList.get(a));
+            System.out.println("freq: " + this.matrix[a][0]);
+            System.out.println("contains  : " + this.matrix[a][1] + "\n");
+        }
+    }
+}
