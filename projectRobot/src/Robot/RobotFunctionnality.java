@@ -1,8 +1,10 @@
 package Robot;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -12,17 +14,49 @@ public class RobotFunctionnality {
 
 	static String currentUrl;
 	String[] keyWords;
-	Integer time;
+	static Integer time;
 	Integer counter;
-	private static WebDriver driver; 
+	private static WebDriver driver;
+
+	static List <int[]> compteurAssocieAuLien = new ArrayList<int[]>();
+	static List <String> lienSauvegarde = new ArrayList<String>();
 	
-	public static WebDriver setUp(String adresseUrl) throws Exception {
+	//--------------------------------- NAVIGATION -----------------------------------------------
+	public static void setUp(String adresseUrl) throws Exception {
 		
 		currentUrl = adresseUrl;
 		driver.get(currentUrl);
-		return driver;
+	
 		
 	}
+	
+	public static void navigationSetUp(List<String> LiensChoisi, LinkSelector ls,Thread t){
+		if(LiensChoisi.size() != 0){
+			System.out.println("Lien qui va etre acceder : " +LiensChoisi.get(LiensChoisi.size() - 1));
+			navigation(LiensChoisi.get(LiensChoisi.size() - 1), ls,t);
+			System.out.println(" Le lien " +LiensChoisi.get(LiensChoisi.size() - 1)+" va etre supprimer");
+			LiensChoisi.remove(LiensChoisi.size() - 1);
+			navigationSetUp(LiensChoisi, ls,t);
+		}
+	}
+	
+	public static void navigation(String lienChoisi, LinkSelector ls,Thread t) {
+		lienSauvegarde.add(lienChoisi);
+		driver.get(lienChoisi);
+		
+		try {
+			System.out.println("Time Spent in a page " + time + " sec");
+			t.sleep(time*1000);
+			
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		compteurAssocieAuLien.add(ls.CompareContenuPageAvecMotCles(driver));
+	
+	}
+	
 	
 	public RobotFunctionnality(String url,String []kw,Integer t){
 		
@@ -33,44 +67,41 @@ public class RobotFunctionnality {
 		driver = new FirefoxDriver(); 
 	}
 	
-	public void go(Thread t){
-		WebDriver d = null;
-			System.out.println(currentUrl);
-			try {
-				d = RobotFunctionnality.setUp(currentUrl);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	
+	@SuppressWarnings("static-access")
+	public void go(Thread t) throws Exception{
+		int z=0;
+		if(z==0){
+			RobotFunctionnality.setUp(currentUrl);
+			z++;
+		}
+		
 	
 		
 		LinkExtractor le=new LinkExtractor(currentUrl);
-		List<String>linkList=le.RecupLien(d);
+		List<String>linkList=le.RecupLien(driver);
 		
-		//LinkSelector --> wait for it
+	
+		LinkSelector ls=new LinkSelector(keyWords);
+		//Select three Best Links Max
+		List<String>tBLinks=ls.threeBestLinks(linkList);
 		
-		Random rand=new Random();
-		int i=rand.nextInt(linkList.size());
-		System.out.println("Ramdom : " + i);
-		try {
-			d = RobotFunctionnality.setUp(linkList.get(i));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		for(int u=0;u<tBLinks.size();u++){
+			System.out.println("Three Best Links : " + tBLinks.get(u));
+		}
+		
+		if(tBLinks.isEmpty()){
+			back();
+		}
+		else{
+			RobotFunctionnality.navigationSetUp(tBLinks,ls,t);
+			currentUrl = ls.LienLePlusPertinent(this.compteurAssocieAuLien,this.lienSauvegarde);
+			System.out.println("Le lien le plus pertinent est : "+ currentUrl);
+			
 		}
 		
 		counter--;
 		if(counter!=0){
-			this.currentUrl=linkList.get(i);
-			try {
-				System.out.println("En Attente pendant " + time + " sec");
-				t.sleep(time*1000);
-				
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
 			go(t);
 		}
 		else{
@@ -79,8 +110,8 @@ public class RobotFunctionnality {
 
 	}
 	
-	public void back(WebDriver d){
-		d.navigate().back();
+	public void back(){
+		driver.navigate().back();
 	}
 	
 	public void close(WebDriver d){

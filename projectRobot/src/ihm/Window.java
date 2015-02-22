@@ -173,7 +173,12 @@ public class Window extends javax.swing.JFrame {
     			RobotFunctionnality rf=new RobotFunctionnality(url,keyWords,i);
     			Thread t=new Thread();
     			t.start();
-    			rf.go(t);
+    			try {
+					rf.go(t);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
     		}
     		else{
     			JOptionPane jop1 = new JOptionPane();

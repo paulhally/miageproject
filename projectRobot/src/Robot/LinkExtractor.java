@@ -33,7 +33,7 @@ public class LinkExtractor {
 		for(int i = 0; i < ListLien.size(); i++){
 			lien = ListLien.get(i).getAttribute("href");
 			
-			if(lien.startsWith("http")){
+			if(lien.startsWith("http")&& !lien.contains("webcache")){
 				TableauLiens.add(lien);
 			}
 		}
