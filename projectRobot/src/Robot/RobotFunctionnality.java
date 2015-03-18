@@ -1,189 +1,246 @@
 package Robot;
 
+import ihm.DisplayEndWindow;
 
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.Map;
 
 import javax.swing.JOptionPane;
 
-import ihm.DisplayEndWindow;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
-
+/**
+ * La partie navigation du robot, qui va nous permettre de naviguer de pages en
+ * pages
+ * 
+ *
+ */
 public class RobotFunctionnality {
 
-    static String currentUrl;
-    String[] keyWords;
-    static Integer time;
-    Integer counter;
-    private static WebDriver driver;
-    boolean error=false;
-    static List <int[]> compteurAssocieAuLien = new ArrayList<int[]>();
-    static List <String> lienSauvegarde = new ArrayList<String>();
-    private String urlInitiale = "";
-    private String urlFinale = "";
-    private boolean  tour1 = true;
-    private long startTime = 0;
-    private long finalTime = 0;
+	static String currentUrl;
+	String[] keyWords;
+	static Integer time;
+	Integer counter;
+	private static WebDriver driver;
 
+	static List<int[]> compteurAssocieAuLien = new ArrayList<int[]>();
+	static List<String> lienSauvegarde = new ArrayList<String>();
+	static List<Integer> position = new ArrayList<Integer>();
+	static ArrayList<String> allLinks = new ArrayList<String>();
+	/**
+	 * Permet de supprimer des liens dit "ancres", car impertinent
+	 * 
+	 * @param tmp
+	 *            Notre tableau de liens temporaires
+	 * @param Model
+	 *            Un String contenant l'url de la page en cours de navigation
+	 * @return Un tableau de liens sans liens ancres
+	 */
+	public static List<String> deleteAnchor(List<String> tmp, String Model) {
+		// String Model = cu;
+		List<String> afterRemoval = new ArrayList<String>();
+		for (int i = 0; i < tmp.size(); i++) {
+			if (!(tmp.get(i).startsWith(Model)))
+				afterRemoval.add(tmp.get(i));
+		}
+		return afterRemoval;
+	}
 
+	// --------------------------------- NAVIGATION
+	// -----------------------------------------------
 
+	/**
+	 * Permet d'acceder Ã  un lien web
+	 * 
+	 * @param adresseUrl
+	 *            Notre premeir lien web qui va etre accÃ©der, a partir duquel on
+	 *            va commencer la recherche (expl:google.fr)
+	 * @throws Exception
+	 */
+	public static void setUp(String adresseUrl) throws Exception {
+		currentUrl = adresseUrl;
+		if (correctNavigationLink(adresseUrl)) {
+			currentUrl = adresseUrl;
+			driver.get(currentUrl);
+		} else {
+			close(driver);
+			JOptionPane jop1 = new JOptionPane();
+			jop1.showMessageDialog(null, "URL ADRESS Not Found", "Information",JOptionPane.INFORMATION_MESSAGE);
+			Thread.currentThread().stop();
 
-    //--------------------------------- NAVIGATION -----------------------------------------------
+		}
+	}
 
-    public static void back(){
-        driver.navigate().back();
-    }
+	/**
+	 * Permet d'accÃ©der Ã  nos trois meilleures liens un par un
+	 * 
+	 * @see RobotFunctionnality#navigation(String, LinkSelector, Thread)
+	 * @param LiensChoisi
+	 *            Tableaux contenant nos trois meilleures liens
+	 * @param ls
+	 *            notre objet LinkSelector
+	 * @param t
+	 *            une thread qu'on mettra en pause, pour espacer le temps de
+	 *            navigation entre chaque pages
+	 */
+	public static void navigationSetUp(List<String> LiensChoisi,
+			LinkSelector ls, Thread t) {
+		if (LiensChoisi.size() != 0) {
+			System.out.println("Lien qui va etre acceder : "
+					+ LiensChoisi.get(LiensChoisi.size() - 1));
+			if (correctNavigationLink(LiensChoisi.get(LiensChoisi.size() - 1))) {
+				navigation(LiensChoisi.get(LiensChoisi.size() - 1), ls, t);
+				System.out.println(" Le lien "
+						+ LiensChoisi.get(LiensChoisi.size() - 1)
+						+ " va etre supprimer");
+				LiensChoisi.remove(LiensChoisi.size() - 1);
+				navigationSetUp(LiensChoisi, ls, t);
+			} else {
+				back();
+				JOptionPane jop1 = new JOptionPane();
+				jop1.showMessageDialog(null,
+						"URL ADRESS Not Found, back to the previous page.",
+						"Information", JOptionPane.INFORMATION_MESSAGE);
 
-    public static void close(){
-        driver.close();
-    }
+			}
+		}
+	}
 
-    public static void setUp(String adresseUrl) throws Exception {
+	/**
+	 * Permet d'acceder Ã  nos trois meilleures liens un par un
+	 * 
+	 * @see RobotFunctionnality#navigationSetUp(List, LinkSelector, Thread)
+	 * @param lienChoisi
+	 * @param ls
+	 * @param t
+	 */
+	public static void navigation(String lienChoisi, LinkSelector ls, Thread t) {
+		lienSauvegarde.add(lienChoisi);
+		allLinks.add(lienChoisi);
+		driver.get(lienChoisi);
 
-        if(correctNavigationLink(adresseUrl)){
-            currentUrl = adresseUrl;
-            driver.get(currentUrl);
-        }
-        else{
-            RobotFunctionnality.close();
-            JOptionPane jop1 = new JOptionPane();
-            jop1.showMessageDialog(null, "URL de l'adresse introuvable", "Information", JOptionPane.INFORMATION_MESSAGE);
-            Thread.currentThread().interrupt();
-        }
-    }
+		try {
+			System.out.println("Time Spent in a page " + time + " sec");
+			t.sleep(time * 1000);
 
-    public static void navigationSetUp(List<String> LiensChoisi, LinkSelector ls,Thread t){
-        if(LiensChoisi.size() != 0){
-            System.out.println("Lien qui va etre acceder : " +LiensChoisi.get(LiensChoisi.size() - 1));
-            if(correctNavigationLink(LiensChoisi.get(LiensChoisi.size() - 1))){
-                navigation(LiensChoisi.get(LiensChoisi.size() - 1), ls,t);
-                System.out.println(" Le lien " +LiensChoisi.get(LiensChoisi.size() - 1)+" va etre supprimer");
-                LiensChoisi.remove(LiensChoisi.size() - 1);
-                navigationSetUp(LiensChoisi, ls,t);
-            }
-            else{
-                back();
-                JOptionPane jop1 = new JOptionPane();
-                jop1.showMessageDialog(null, "URL de l'adresse introuvable, retour sur la page précedente.", "Information", JOptionPane.INFORMATION_MESSAGE);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("Lien qui va etre ajouter au compteur lien" + lienChoisi);
+		compteurAssocieAuLien.add(ls.CompareContenuPageAvecMotCles(driver));
 
-            }
-        }
-    }
+	}
 
-    public static void navigation(String lienChoisi, LinkSelector ls,Thread t) {
-        lienSauvegarde.add(lienChoisi);
-        driver.get(lienChoisi);
-        try {
-            System.out.println("Temps passé sur la page " + time + " sec");
-            t.sleep(time*1000);
+	/**
+	 * Constructeur du Robot
+	 * 
+	 * @param url
+	 *            Lien web
+	 * @param kw
+	 *            Tableaux de nos mots cles
+	 * @param t
+	 *            Temps de navigation
+	 * 
+	 * @see RobotFunctionnality#currentUrl
+	 * @see RobotFunctionnality#keyWords
+	 * @see RobotFunctionnality#time
+	 * @see RobotFunctionnality#counter
+	 */
+	public RobotFunctionnality(String url, String[] kw, Integer t) {
 
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            System.out.println("Lien qui va etre acceder");
-        }
-        //bug ligne suivante
-        compteurAssocieAuLien.add(ls.CompareContenuPageAvecMotCles(driver));
-    }
+		this.currentUrl = url;
+		this.keyWords = kw;
+		this.time = t;
+		this.counter = 1;
+		driver = new FirefoxDriver();
+	}
 
-    public RobotFunctionnality(String url,String []kw,Integer t){
-        this.currentUrl=url;
-        this.keyWords=kw;
-        this.time=t;
-        this.counter=2;
-        driver = new FirefoxDriver();
-    }
+	@SuppressWarnings("static-access")
+	/**
+	 * Method which launch the robot
+	 * @param t
+	 * @throws Exception
+	 */
+	public void go(Thread t) throws Exception {
+		int z = 0;
+		if (z == 0) {
+			this.allLinks.add(currentUrl);
+			RobotFunctionnality.setUp(currentUrl);
+			z++;
+		}
 
-    @SuppressWarnings("static-access")
-    public void go(Thread t) throws Exception{
-       // startTime = System.currentTimeMillis();
-        //System.out.println("tour1 vaut:==> " + tour1);
-        if(tour1){
-            urlInitiale = currentUrl;
-            tour1 = false;
-        }
-        
-        System.out.println("**************************************");
-        System.out.println("valeur de l'url courante " + currentUrl);
-        System.out.println("**************************************");
+		LinkExtractor le = new LinkExtractor(currentUrl);
+		List<String> linkList = le.RecupLien(driver);
+		LinkSelector ls = new LinkSelector(keyWords);
+		// Select three Best Links Max
+		List<String> tBLinks = ls.threeBestLinks(linkList);
+		position = ls.positionLienDansLaPage(tBLinks, linkList);
 
-        /*int z=0;
-        if(z==0){*/
-        RobotFunctionnality.setUp(currentUrl);
-        LinkExtractor le=new LinkExtractor(currentUrl, driver);
-        List<String>linkList=le.RecupLien(driver);
-        LinkSelector ls=new LinkSelector(keyWords,linkList);
-        //Select three Best Links Max
-        List<String>tBLinks=ls.threeBestLinks(linkList);
+		for (int u = 0; u < tBLinks.size(); u++) {
+			System.out.println("Trois meilleurs liens : " + tBLinks.get(u));
+		}
+		//tBLinks = RobotFunctionnality.deleteAnchor(tBLinks, currentUrl);
+		
+		if (tBLinks.isEmpty()) {
+			System.out.println("Aucun lien n'est meilleur");
+			counter=1;
+		} else {
+			RobotFunctionnality.navigationSetUp(tBLinks, ls, t);
+			currentUrl = ls.LienLePlusPertinent(this.compteurAssocieAuLien,this.lienSauvegarde, this.position);
+			System.out.println("Le lien le plus pertinent est : " + currentUrl);
+			RobotFunctionnality.setUp(currentUrl);
+		}
 
-        for(int i=0;i<tBLinks.size();i++){
-            System.out.println("Les trois meilleurs liens : " + tBLinks.get(i));
-        }
-        if(tBLinks.isEmpty()){
-            back();
-        }
-        else{
-            RobotFunctionnality.navigationSetUp(tBLinks,ls,t);
-            String bestUrl=ls.LienLePlusPertinent(this.compteurAssocieAuLien,this.lienSauvegarde);
-            if(currentUrl!=bestUrl){
-	            currentUrl = bestUrl;
-	            System.out.println("Le lien le plus pertinent est : "+ currentUrl);
-	            RobotFunctionnality.setUp(currentUrl);
-            }
-            else{
-            	System.out.println("Le lien le plus pertinent n'a pas changé. ");
-            	
-            	counter=1;
-            }
-        }
-        counter--;
-        if(counter!=0){
-            go(t);
-        }
-        else{
-            System.out.println("Surf terminé");
-            urlFinale = currentUrl;
-            finalTime = System.currentTimeMillis();
-            long executionTime = (finalTime - startTime)/1000;
-            /*System.out.println("*********Résultats********");
-            System.out.println("l'éxecution a duré:==> " + executionTime);
-            System.out.println("Url initiale: " + urlInitiale);
-            System.out.println("url finale: " + urlFinale);
-            System.out.println("*******fin affichage**********");*/
-            //insérer la fenêtre des résultat DisplayEndWindow
-            DisplayEndWindow dew = new DisplayEndWindow(urlInitiale, urlFinale,executionTime);
+		counter--;
+		if (counter != 0) {
+			this.lienSauvegarde.clear();
+			this.compteurAssocieAuLien.clear();
+			go(t);
+		} else {
+			this.allLinks.add(currentUrl);
+			DisplayEndWindow endDisplay=new DisplayEndWindow(allLinks,1000);
+			System.out.println("Surf terminï¿½");
+		}
 
-        }
-    }
-    /**
-     * Test the connection of a page
-     * @param url
-     * @return
-     */
-    public static boolean correctNavigationLink(String url){
-        try{
-            URL obj = new URL(url);
-            URLConnection conn = obj.openConnection();
+	}
 
-            //Map<String, List<String>> map = conn.getHeaderFields();
-            //System.out.println("Printing Response Header...\n");
+	/**
+	 * + * Test the connection of a page + * @param url + * @return +
+	 */
+	public static boolean correctNavigationLink(String url) {
+		try {
+			URL obj = new URL(url);
+			URLConnection conn = obj.openConnection();
+			Map<String, List<String>> map = conn.getHeaderFields();
+			for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+			}
+			String server = conn.getHeaderField("Server");
+			if (server == null) 
+				return false;
+			 else 
+				return true;
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return false;
+	}
 
-            /*for (Map.Entry<String, List<String>> entry : map.entrySet()) {
-                //System.out.println("Key : " + entry.getKey()
-                //        + " ,Value : " + entry.getValue());
-            }*/
-            //System.out.println("\nGet Response Header By Key ...\n");
-            String server = conn.getHeaderField("Server");
-            return server != null;
-        } catch (Exception e) {
-            e.printStackTrace();
+	public static void back() {
+		driver.navigate().back();
+	}
 
-        }
-        return false;
-
-    }
+	/**
+	 * @author Kevin Carli Ferme la navigation
+	 * @param d
+	 */
+	public static void close(WebDriver d) {
+		d.close();
+	}
 }
