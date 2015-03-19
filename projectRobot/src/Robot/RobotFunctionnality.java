@@ -28,7 +28,9 @@ public class RobotFunctionnality {
 	static Integer time;
 	Integer counter;
 	private static WebDriver driver;
-
+	private TimeSpent timeS;
+	
+	
 	static List<int[]> compteurAssocieAuLien = new ArrayList<int[]>();
 	static List<String> lienSauvegarde = new ArrayList<String>();
 	static List<Integer> position = new ArrayList<Integer>();
@@ -160,6 +162,8 @@ public class RobotFunctionnality {
 		this.time = t;
 		this.counter = 1;
 		driver = new FirefoxDriver();
+		this.timeS=new TimeSpent();
+		timeS.start();
 	}
 
 	@SuppressWarnings("static-access")
@@ -205,8 +209,9 @@ public class RobotFunctionnality {
 			go(t);
 		} else {
 			this.allLinks.add(currentUrl);
-			DisplayEndWindow endDisplay=new DisplayEndWindow(allLinks,1000);
-			System.out.println("Surf termin�");
+			DisplayEndWindow endDisplay=new DisplayEndWindow(allLinks,timeS.getTime());
+			timeS.arret();
+			System.out.println("Surf terminé");
 		}
 
 	}
